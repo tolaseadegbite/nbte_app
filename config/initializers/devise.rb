@@ -1,5 +1,19 @@
 # frozen_string_literal: true
 
+class TurboFailureApp < Devise::FailureApp
+  def respond
+    if request_format == :turbo_stream
+      redirect
+    else
+      super
+    end
+  end
+
+  def skip_format?
+    %w[html turbo_stream */*].include? request_format.to_s
+  end
+end
+
 # Assuming you have not yet modified this file, each configuration option below
 # is set to its default value. Note that some are commented out while others
 # are not: uncommented lines are intended to protect your configuration from
@@ -14,11 +28,27 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = '8de02bc3d810b5a61d4c709959214780fa32661ecc08cedd8ab2d154e6e63577f64466f426b99ad2334369727834c540ae3379f726498b2f23bbaba49be6b898'
+  # config.secret_key = 'aea1c232c97bf4b32d6290dbd70c316ec04fd2b88687495dec375991c1d63de7e1380b9d727e250c17f3ce4f216f09827449d2a1b59f4bd4907d1344c4314548'
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
-  # config.parent_controller = 'DeviseController'
+  config.parent_controller = 'TurboDeviseController'
+
+  # ...
+
+  # ==> Navigation configuration
+  # ...
+  config.navigational_formats = ['*/*', :html, :turbo_stream]
+
+  # ...
+
+  # ==> Warden configuration
+  # ...
+  config.warden do |manager|
+    manager.failure_app = TurboFailureApp
+    #   manager.intercept_401 = false
+    #   manager.default_strategies(scope: :user).unshift :some_external_strategy
+  end
 
   # ==> Mailer Configuration
   # Configure the e-mail address which will be shown in Devise::Mailer,
@@ -126,7 +156,7 @@ Devise.setup do |config|
   config.stretches = Rails.env.test? ? 1 : 12
 
   # Set up a pepper to generate the hashed password.
-  # config.pepper = 'd41325b24d2ab14f2d42bbea9442fd1b21eb891305ea42388578571aa1f4a40a4e5846db98b101832d5ab6d16fffb0ddb540faecc424d991205ce13de63fe06b'
+  # config.pepper = '3fca4a0a751824b5f31232fb8568c85bfad810ee9c1b1cd299b73a48aa24d18c1e01d8e322cab44109eaf985ec62466ccaa8ca9177334af2f6e653b057d49a66'
 
   # Send a notification to the original email when the user's email is changed.
   # config.send_email_changed_notification = false
